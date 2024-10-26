@@ -524,6 +524,7 @@ var i18n_en = {
 'displaymode|andre': 'André',
 'displaymode|tim': 'Tim',
 'displaymode|greyish': 'Greyish',
+'displaymode|bkjeugd': 'BK Jeugd',
 'displaymode|onlyplayers': 'players only',
 'displaymode|bwfonlyplayers': 'BWF players only',
 'displaymode|onlyscore': 'score only',

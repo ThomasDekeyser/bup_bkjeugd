@@ -404,6 +404,7 @@
 	border-left-width: 0.04em;
 	border-left-style: solid;
 }
+
 .d_to_winning {
 	font-weight: bold;
 	color: #dba766;
@@ -583,4 +584,22 @@
 	position: absolute;
 	right: 8em;
 	top: 1em;
+}
+
+
+.d_to_team_bkjeugd {
+	width: 33vw;
+}
+
+.d_to_court_bkjeugd {
+	width: 1.4em;
+	padding-right: 0.5em;
+	text-align: right;
+}
+
+.d_to_score_bkjeugd {
+	min-width: 2.6em;
+	text-align: center;
+	border-left-width: 0.08em;
+	border-left-style: solid;
 }

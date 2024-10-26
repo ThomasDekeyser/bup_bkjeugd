@@ -22,6 +22,11 @@ script-deps:
 cleandist:
 	rm -rf -- dist
 
+tde: cleandist ## Create distribution files
+	mkdir -p dist/bup
+
+	node div/make_dist.js . dist/bup/ dist/bup/sources
+
 dist: cleandist ## Create distribution files
 	mkdir -p dist/bup
 

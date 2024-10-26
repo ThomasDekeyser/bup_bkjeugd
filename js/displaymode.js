@@ -24,6 +24,7 @@ var ALL_STYLES = [
 	'streamcourt',
 	'streamteam',
 	'tournament_overview',
+	'bkjeugd',
 	'andre',
 ];
 var ALL_COLORS = [
@@ -403,6 +404,28 @@ function namestr_short(players) {
 	}
 }
 
+function truncateString(str, firstCharCount , endCharCount , dotCount ) {
+	if (str.length <= firstCharCount + endCharCount) {
+		return str; // No truncation needed
+	}
+
+	var firstPortion = str.slice(0, firstCharCount);
+	var endPortion = str.slice(-endCharCount);
+	var dots = '.'.repeat(dotCount);
+
+	return firstPortion+dots+endPortion;
+}
+
+
+function namestr_bkjeugd(players) {
+	if (players.length === 0) {
+		return '';
+	} else if (players.length === 1) {
+		return truncateString(_lastname(players[0]), 12,3,3);
+	} else {
+		return truncateString(_lastname(players[0]),6,1,2) + ', ' + truncateString(_lastname(players[1]), 6,1,2);
+	}
+}
 
 function _match_name(setup) {
 	var res = '';
@@ -478,6 +501,82 @@ function render_tournament_overview(s, container, event) {
 		}
 	});
 }
+
+function _bkjeugd_render_players(tr, players) {
+	var td = uiu.el(tr, 'td', 'd_to_team_bkjeugd');
+	uiu.el(td, 'span', {}, namestr_bkjeugd(players));
+}
+
+function render_bkjeugd(s, container, event) {
+		var max_game_count = _calc_max_games(event);
+		var colors = calc_colors(s.settings, event);
+
+		var table = uiu.el(container, 'table', {
+			'class': 'd_bkjeugd_table',
+			'style': (
+				'table-layout:fixed;width:100%;border-collapse:collapse;font-size:5.5vmin;' +
+				'color:' + colors.fg + ';'
+			),
+		});
+		var tbody = uiu.el(table, 'tbody');
+
+		var nb_ongoing_games = 0;
+		event.courts.forEach(function(court, idx) {
+			var match = _match_by_court(event, court);
+			if (match) {
+				nb_ongoing_games++;
+			}
+		});
+
+		event.courts.forEach(function(court, idx) {
+			var match = _match_by_court(event, court);
+			if (!match) {
+				return
+			}
+
+			var nscore = (match ? match.network_score : 0) || [];
+
+			var tr = uiu.el(tbody, 'tr', {
+				style: (
+					'background:' + ((idx % 2 === 0) ? colors.bg : colors.bg3) + ';' +
+					'color:' + colors.fg + ';' +
+					'height:' + (100 / nb_ongoing_games) + 'vh;'
+				),
+			});
+			uiu.el(tr, 'td', 'd_to_court_bkjeugd', court.label || compat.courtnum(court.id));
+			if (match) {
+				var setup = match.setup;
+
+				_bkjeugd_render_players(tr, setup.teams[0].players);
+				_bkjeugd_render_players(tr, setup.teams[1].players);
+			} else {
+				uiu.el(tr, 'td', {
+					colspan: 2,
+				});
+			}
+			for (var game_idx = 0;game_idx < max_game_count;game_idx++) {
+				var score_td = uiu.el(tr, 'td', {
+					'class': 'd_to_score_bkjeugd',
+					style: 'border-color: #FFF',
+				});
+
+				var n = nscore[game_idx];
+				if (match && n) {
+					var gwinner = calc.game_winner(match.setup.counting, game_idx, n[0], n[1]);
+					uiu.el(score_td, 'span', {
+						'class': ((gwinner === 'left') ? 'd_to_winning' : ''),
+					}, n[0]);
+					uiu.el(score_td, 'span', {
+						'class': 't_to_vs',
+					}, ':');
+					uiu.el(score_td, 'span', {
+						'class': ((gwinner === 'right') ? 'd_to_winning' : ''),
+					}, n[1]);
+				}
+			}
+		});
+	}
+
 
 function render_castall(s, container, event, colors) {
 	if (!event.courts) {
@@ -2879,6 +2978,7 @@ function update(err, s, event) {
 		castall: render_castall,
 		greyish: render_greyish,
 		tournament_overview: render_tournament_overview,
+		bkjeugd: render_bkjeugd,
 		tim: render_tim,
 		teamscore: render_teamscore,
 		stream: render_stream,
@@ -3077,6 +3177,7 @@ function option_applies(style_id, option_name) {
 		teamscore: ['team_colors', 'c0', 'c1', 'cfg', 'cbg'],
 		tim: ['cbg', 'cfg', 'ctim_blue', 'ctim_active'],
 		tournament_overview: ['cfg', 'cbg', 'cbg3', 'cborder', 'cfg2'],
+		bkjeugd: ['cfg', 'cbg', 'cbg3', 'cborder', 'cfg2'],
 		stripes: ['court_id', 'cbg', 'team_colors', 'c0', 'c1', 'cfg', 'cfgdark', 'cbg4', 'cserv'],
 	};
 	var bs = BY_STYLE[style_id];
